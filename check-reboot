@@ -2,7 +2,7 @@
 
 VERSION=v0.0.1
 
-ALERT_STATUS=1
+ALERT_STATUS=2
 
 function usage() {
     cat <<EOC
