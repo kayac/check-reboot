@@ -1,0 +1,70 @@
+#!/bin/bash
+
+VERSION=v0.0.1
+
+ALERT_STATUS=1
+
+function usage() {
+    cat <<EOC
+usage: check-reboot [options]
+    Description:
+        Detect reboot.
+
+    Options:
+        -h  show help
+        -w  set alert level WARNING (exit status 1). (default: not selected)
+        -c  set alert level CRITICAL (exit status 2). (default: selected)
+EOC
+}
+
+function check_reboot() {
+    GET_UPTIME_RESULT="$(/usr/local/bin/mkr metrics \
+        --host $(cat /var/lib/mackerel-agent/id) \
+        --name custom.uptime.seconds \
+        --from $(date +%s -d '10 minutes ago') 2>&1)"
+
+    if [[ $? != 0 ]]; then
+        echo "OK: cannnot fetch uptime metrics. may be just started."
+        echo "$GET_UPTIME_RESULT"
+        exit 0
+    fi
+
+    RESULT="$(
+        awk '
+            NR%2==0 {
+                if ( prev > $1 ) {
+                    print "uptime: " $1 ", just restarted.";
+                    exit 1;
+                }
+                prev = $1;
+            }
+            NR%2!=0 {
+                time = $1;
+            }
+            END {
+                print "previous uptime: " prev;
+            }
+        ' <( echo "$GET_UPTIME_RESULT" | egrep -o '[0-9]+')
+    )"
+
+if [[ $? != 0 ]]; then
+    echo "FAIL: $RESULT"
+    exit $ALERT_STATUS
+fi
+
+echo "OK: $RESULT"
+}
+
+while getopts cwh OPT; do
+    case $OPT in
+        c)
+            ALERT_STATUS=2;;
+        w)
+            ALERT_STATUS=1;;
+        h)
+            usage
+            exit 0
+    esac
+done
+
+check_reboot
