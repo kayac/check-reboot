@@ -21,7 +21,7 @@ function check_reboot() {
     GET_UPTIME_RESULT="$(/usr/local/bin/mkr metrics \
         --host $(cat /var/lib/mackerel-agent/id) \
         --name custom.uptime.seconds \
-        --from $(date +%s -d '10 minutes ago') 2>&1)"
+        --from $(( $(date +%s) - 600 )) 2>&1)"
 
     if [[ $? != 0 ]]; then
         echo "OK: cannnot fetch uptime metrics. may be just started."
