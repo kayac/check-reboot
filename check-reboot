@@ -44,7 +44,7 @@ function check_reboot() {
             END {
                 print "previous uptime: " prev;
             }
-        ' <( echo "$GET_UPTIME_RESULT" | egrep -o '[0-9.]+')
+            ' <( echo "$GET_UPTIME_RESULT" | egrep -o '[0-9]+(.[0-9]+)?')
     )"
 
 if [[ $? != 0 ]]; then
