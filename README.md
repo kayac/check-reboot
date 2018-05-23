@@ -14,6 +14,19 @@ usage: check-reboot [options]
         -c  set alert level CRITICAL (exit status 2). (default: selected)
 ```
 
+## Example
+
+Example settings for mackerel agent conf.
+
+```
+[plugin.checks.check_reboot]
+command = "/opt/mackerel-agent/plugins/bin/check-reboot -w"
+timeout_seconds = 45
+```
+
+Recommend setting `timeout_seconds` longer than 30sec (default value is 30sec).
+check-reboot uses mkr command and mkr timeout is 30sec (unchangeable), So check-reboot may take longer than 30sec.
+
 ## License
 Copyright 2018 KAYAC Inc.
 
